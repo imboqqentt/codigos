@@ -1,0 +1,28 @@
+int hora=0;
+int minuto=0;
+int segundo=0;
+
+void setup() {
+}
+
+void loop() {
+  Serial.begin(9600);
+  while (segundo<=59){
+    
+    delay(1000);
+    Serial.println("la hora es  " + String(hora) + ":" + String(minuto) + ":" + String(segundo) );
+    segundo=segundo+1;
+    if (segundo==60 && minuto<60){
+      minuto=minuto+1;
+      segundo=0;
+    }else if(minuto==60 && hora<24){
+      hora=hora+1;
+      minuto=0;
+      }else if(hora==24){
+        hora=0;
+        }
+ 
+    
+    }
+  
+}
