@@ -15,7 +15,11 @@ const CONFIG = {
      El resultado se muestra siempre como un rango (±25%) y con el
      aviso de que no constituye una cotización formal.
   ------------------------------------------------------------- */
-  ufValor: 39500,          // Valor de la UF en pesos (actualízalo cuando quieras)
+
+  // La UF se consulta sola a mindicador.cl (API pública, sin registro).
+  // Este número solo se usa si la consulta falla; conviene refrescarlo
+  // de vez en cuando para que el respaldo no quede muy viejo.
+  ufValor: 40844.79,
   tarifaBase: {            // UF por m² — cálculo estructural
     vivienda:   0.20,
     ampliacion: 0.26,
@@ -30,7 +34,9 @@ const CONFIG = {
     madera:      0.95,
     mixto:       1.10
   },
-  minimoUF: 12             // Cobro mínimo referencial del servicio (UF)
+  minimoUF: 12,            // Cobro mínimo referencial del servicio (UF)
+
+  ufApi: 'https://mindicador.cl/api/uf'
 };
 
 /* ============================================================
@@ -83,6 +89,104 @@ if ('IntersectionObserver' in window) {
   reveals.forEach(el => io.observe(el));
 } else {
   reveals.forEach(el => el.classList.add('visible'));
+}
+
+/* ============================================================
+   2b. El sketch estructural se dibuja solo
+   ------------------------------------------------------------
+   Cada trazo lleva data-p con su etapa de obra. Se dibuja en el
+   orden real de construcción: terreno, zapatas, pilares del 1er
+   nivel, vigas y losa, pilares del 2º, losa, cubierta, vanos y
+   por último las cotas.
+   ============================================================ */
+const sketch = document.querySelector('.sketch');
+
+// Segundo en que arranca cada etapa
+const ETAPAS = [0, 0.5, 1.2, 2.0, 2.8, 3.5, 4.2, 4.8, 5.3];
+
+/* Los trazos usan vector-effect:non-scaling-stroke, así que el patrón de
+   guiones se mide en píxeles de pantalla, mientras que getTotalLength()
+   devuelve unidades del viewBox. Esta es la razón entre ambos. */
+function escalaSketch() {
+  const vb = sketch?.viewBox?.baseVal;
+  const ancho = sketch?.getBoundingClientRect().width;
+  return (vb?.width && ancho) ? ancho / vb.width : 1;
+}
+
+function dibujarSketch() {
+  if (!sketch) return;
+
+  const trazos = [...sketch.querySelectorAll('.sk')];
+  const textos = [...sketch.querySelectorAll('.sk-txt')];
+  const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (quieto) {
+    trazos.forEach(t => { t.style.strokeDasharray = ''; t.style.strokeDashoffset = ''; });
+    textos.forEach(t => { t.style.opacity = '1'; });
+    return;
+  }
+
+  // 1. Estado inicial: cada trazo oculto, todavía sin transición
+  const cuenta = {};
+  const espera = new Map();
+
+  trazos.forEach(el => {
+    const etapa = Number(el.dataset.p) || 0;
+    cuenta[etapa] = (cuenta[etapa] || 0) + 1;
+
+    // Pequeño desfase dentro de la etapa: se siente trazado a mano
+    espera.set(el, ETAPAS[etapa] + cuenta[etapa] * 0.022);
+
+    let largo = 0;
+    try { largo = el.getTotalLength(); } catch { largo = 0; }
+
+    el.style.transition = 'none';
+    if (largo) {
+      // El trazo se escala con el SVG, así que el patrón de guiones se mide
+      // en píxeles de pantalla: hay que llevar el largo a esa misma escala.
+      const l = largo * escalaSketch() + 1;
+      el.style.strokeDasharray  = l;
+      el.style.strokeDashoffset = l;
+    } else {
+      el.style.opacity = '0';           // navegador sin getTotalLength
+    }
+  });
+
+  textos.forEach(t => { t.style.transition = 'none'; t.style.opacity = '0'; });
+
+  // 2. Forzar el recálculo para que el navegador registre ese estado inicial.
+  //    Sin esto, el salto al valor final ocurre sin animación.
+  void sketch.getBoundingClientRect();
+
+  // 3. Estado final: ahora sí, con transición y su retardo por etapa
+  trazos.forEach(el => {
+    const d = espera.get(el);
+    if (el.style.strokeDasharray) {
+      el.style.transition = `stroke-dashoffset .8s cubic-bezier(.45,.05,.35,1) ${d}s`;
+      el.style.strokeDashoffset = '0';
+    } else {
+      el.style.transition = `opacity .5s ease ${d}s`;
+      el.style.opacity = '1';
+    }
+  });
+
+  textos.forEach((t, i) => {
+    t.style.transition = `opacity .7s ease ${ETAPAS[8] + 0.3 + i * 0.14}s`;
+    t.style.opacity = '1';
+  });
+}
+
+// Se dibuja al cargar y se vuelve a dibujar si el visitante regresa arriba
+if (sketch && 'IntersectionObserver' in window) {
+  let dentro = false;
+  new IntersectionObserver(entradas => {
+    entradas.forEach(e => {
+      if (e.isIntersecting && !dentro) { dentro = true; dibujarSketch(); }
+      else if (!e.isIntersecting) { dentro = false; }
+    });
+  }, { threshold: 0.3 }).observe(sketch);
+} else {
+  dibujarSketch();
 }
 
 /* ============================================================
@@ -153,6 +257,61 @@ function calcular() {
   el?.addEventListener('change', calcular);
 });
 calcular();
+
+/* ============================================================
+   4b. Valor de la UF, al día
+   ------------------------------------------------------------
+   Se consulta mindicador.cl (API pública chilena, sin registro).
+   El resultado se guarda para el resto del día, así una segunda
+   visita no vuelve a pedirlo. Si la consulta falla —sin internet,
+   servicio caído— se usa CONFIG.ufValor y se avisa en pantalla.
+   ============================================================ */
+const qFuente = document.getElementById('q-fuente');
+
+const soloFecha = d => d.toISOString().slice(0, 10);
+
+function mostrarUF(valor, fecha, enVivo) {
+  CONFIG.ufValor = valor;
+  calcular();
+  if (!qFuente) return;
+
+  const monto = valor.toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  qFuente.classList.toggle('en-vivo', Boolean(enVivo));
+  qFuente.textContent = enVivo
+    ? `UF de hoy: $${monto} · ${fecha}`
+    : `UF de referencia: $${monto} (no se pudo consultar el valor de hoy)`;
+}
+
+function leerCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem('mg_uf') || 'null');
+    return c && c.dia === soloFecha(new Date()) ? c : null;
+  } catch { return null; }
+}
+
+async function cargarUF() {
+  const cache = leerCache();
+  if (cache) { mostrarUF(cache.valor, cache.fecha, true); return; }
+
+  try {
+    const r = await fetch(CONFIG.ufApi, { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+
+    const dato = (await r.json())?.serie?.[0];
+    if (!dato || !Number.isFinite(dato.valor)) throw new Error('respuesta inesperada');
+
+    const fecha = new Date(dato.fecha).toLocaleDateString('es-CL');
+    try {
+      localStorage.setItem('mg_uf',
+        JSON.stringify({ dia: soloFecha(new Date()), valor: dato.valor, fecha }));
+    } catch { /* modo privado: seguimos igual, solo sin recordar */ }
+
+    mostrarUF(dato.valor, fecha, true);
+  } catch {
+    mostrarUF(CONFIG.ufValor, null, false);
+  }
+}
+cargarUF();
 
 /* Botón del cotizador: precarga el formulario con lo seleccionado */
 document.getElementById('q-send')?.addEventListener('click', () => {

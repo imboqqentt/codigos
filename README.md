@@ -16,7 +16,9 @@ assets/img/favicon.svg  Ícono de la pestaña del navegador
 
 ## Secciones
 
-1. **Portada** — "Ingeniería que sostiene tus ideas"
+1. **Portada** — "Ingeniería que sostiene tus ideas", con un sketch estructural que se
+   dibuja solo siguiendo el orden real de obra: terreno, zapatas, pilares, vigas y losa,
+   segundo nivel, cubierta y por último las cotas
 2. **Valores** — Precisión · Seguridad · Experiencia · Compromiso
 3. **Servicios** — Cálculos estructurales, Planos estructurales, Supervisión técnica,
    Asesoría profesional, Optimización de recursos
@@ -47,11 +49,23 @@ Todo lo configurable está al inicio de `assets/js/main.js`, en el bloque `CONFI
 ```js
 whatsapp: '56996761602',              // sin "+" ni espacios
 email:    'ingenieria.mg25@gmail.com',
-ufValor:  39500,                      // valor de la UF en pesos
+ufValor:  40844.79,                   // solo respaldo: la UF se consulta sola
 tarifaBase: { vivienda: 0.20, ... },  // UF por m² de cada tipo de proyecto
 factorMaterial: { hormigon: 1.15, ... },
-minimoUF: 12                          // cobro mínimo referencial
+minimoUF: 12,                         // cobro mínimo referencial
+ufApi: 'https://mindicador.cl/api/uf'
 ```
+
+### El valor de la UF se actualiza solo
+
+El cotizador consulta la UF del día a **mindicador.cl**, una API pública chilena
+gratuita y sin registro. Bajo el resultado aparece una etiqueta con el valor y la fecha
+usados, para que el visitante sepa con qué se calculó.
+
+El valor se guarda en el navegador por el resto del día, así una segunda visita no vuelve
+a pedirlo. Si la consulta falla —sin internet o servicio caído— se usa el número de
+`ufValor` y la etiqueta avisa que es un valor de referencia. Conviene refrescar ese número
+de vez en cuando para que el respaldo no quede muy viejo.
 
 > **Importante:** las tarifas del cotizador son valores de ejemplo. **Reemplázalas por tus tarifas
 > reales antes de publicar el sitio.** El resultado siempre se muestra como un rango y con el aviso

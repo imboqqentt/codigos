@@ -176,22 +176,48 @@ ul{margin:0;padding:0;list-style:none}
 .hero-stats span{font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.62)}
 
 .hero-art{display:flex;justify-content:center}
+
+/* Lámina: el sketch estructural se dibuja sobre papel cuadriculado */
 .blueprint{
-  position:relative;width:min(100%,420px);aspect-ratio:1;border-radius:var(--radius-lg);
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);
-  box-shadow:var(--shadow-lg);display:grid;place-items:center;padding:1.6rem;
-  animation:float 7s ease-in-out infinite;
+  position:relative;margin:0;width:min(100%,430px);
+  display:flex;flex-direction:column;gap:.7rem;
+  padding:1.5rem 1.5rem 1rem;border-radius:var(--radius-lg);
+  background:linear-gradient(158deg,rgba(255,255,255,.055),rgba(255,255,255,.015));
+  border:1px solid rgba(255,255,255,.14);box-shadow:var(--shadow-lg);
+  animation:float 9s ease-in-out infinite;
 }
-@keyframes float{0%,100%{transform:translateY(-8px)}50%{transform:translateY(8px)}}
-.frame-svg{width:100%;height:auto}
-.frame-lines line,.frame-lines rect{
-  fill:none;stroke:rgba(255,255,255,.4);stroke-width:1.5;
-  stroke-dasharray:900;stroke-dashoffset:900;animation:draw 3.2s ease forwards;
+@keyframes float{0%,100%{transform:translateY(-7px)}50%{transform:translateY(7px)}}
+.blueprint::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);
+  background-size:24px 24px;
+  -webkit-mask-image:radial-gradient(circle at 50% 42%,#000,transparent 82%);
+          mask-image:radial-gradient(circle at 50% 42%,#000,transparent 82%);
 }
-.frame-lines line:nth-child(n+8){stroke:rgba(230,189,109,.75);animation-delay:.6s}
-@keyframes draw{to{stroke-dashoffset:0}}
-.frame-nodes circle{fill:var(--gold);opacity:0;animation:pop .5s ease forwards 2.4s}
-@keyframes pop{to{opacity:1}}
+.sketch{position:relative;display:block;width:100%;height:auto}
+.blueprint-pie{
+  position:relative;display:flex;justify-content:space-between;gap:1rem;
+  padding-top:.65rem;border-top:1px solid rgba(255,255,255,.12);
+  font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.42);
+}
+.bp-esc{color:rgba(230,189,109,.65)}
+
+/* Trazos del sketch, por elemento estructural */
+.sk{fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;
+  vector-effect:non-scaling-stroke}
+.terreno,.terreno-h{stroke:rgba(255,255,255,.26)}
+.zapata{stroke:rgba(255,255,255,.5)}
+.pilar{stroke:var(--gold-300)}
+.pilar-b{stroke:var(--gold);opacity:.55}
+.viga{stroke:rgba(255,255,255,.8)}
+.losa{stroke:rgba(255,255,255,.55)}
+.losa-canto{stroke:rgba(255,255,255,.36)}
+.cubierta{stroke:rgba(255,255,255,.7)}
+.vano{stroke:rgba(255,255,255,.28)}
+.cota,.cota-aux{stroke:var(--gold)}
+.sk-txt{fill:var(--gold-300);stroke:none;font-family:var(--sans);
+  font-size:8.5px;font-weight:600;letter-spacing:.4px}
 
 /* ───────── Valores ───────── */
 .values{background:var(--bg-soft);border-bottom:1px solid var(--line)}
@@ -276,15 +302,27 @@ ul{margin:0;padding:0;list-style:none}
   background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius-lg);
   padding:clamp(1.6rem,3vw,2.4rem);
 }
-.quoter-fields{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+/* min-width:0 deja que la grilla se encoja: sin esto, el ancho natural
+   de los <select> arrastra el bloque y la página se desplaza de lado. */
+.quoter-fields{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;min-width:0}
 .quoter-result{
   background:linear-gradient(160deg,var(--navy-800),var(--navy-700));color:#fff;
   border-radius:var(--radius);padding:1.8rem 1.5rem;text-align:center;box-shadow:var(--shadow);
+  min-width:0;
 }
 .quoter-label{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-300);margin-bottom:.4rem}
 .quoter-value{font-family:var(--serif);font-size:clamp(1.35rem,3vw,1.8rem);color:#fff;margin:0 0 .2rem;line-height:1.3}
 .quoter-value .sep{font-size:.85rem;color:rgba(255,255,255,.6);font-family:var(--sans)}
-.quoter-uf{font-size:.82rem;color:var(--gold-300);margin-bottom:1rem}
+.quoter-uf{font-size:.82rem;color:var(--gold-300);margin-bottom:.35rem}
+.quoter-fuente{
+  display:inline-flex;align-items:center;gap:.4rem;margin:0 auto 1rem;
+  padding:.25rem .7rem;border-radius:999px;background:rgba(255,255,255,.07);
+  font-size:.68rem;color:rgba(255,255,255,.62);
+}
+.quoter-fuente::before{
+  content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none;
+}
+.quoter-fuente.en-vivo::before{background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.2)}
 .quoter-note{font-size:.73rem;line-height:1.55;color:rgba(255,255,255,.62);margin-bottom:1.2rem}
 .quoter-note strong{color:rgba(255,255,255,.85)}
 
@@ -428,7 +466,9 @@ a.contact-card:hover{background:rgba(255,255,255,.1);transform:translateY(-6px);
   .quoter{grid-template-columns:1fr}
   .footer-inner{grid-template-columns:1fr 1fr}
 }
-@media (max-width:760px){
+/* El menú horizontal deja de caber junto al logo bastante antes de los
+   760px, así que el desplegable entra ya en tablet. */
+@media (max-width:1080px){
   html{scroll-padding-top:72px}
   .nav-toggle{display:flex}
   .nav{
@@ -440,6 +480,8 @@ a.contact-card:hover{background:rgba(255,255,255,.1);transform:translateY(-6px);
   .nav ul{flex-direction:column;align-items:stretch;gap:0;padding:.8rem 22px 1.4rem}
   .nav a{padding:.95rem .4rem;font-size:.85rem;border-bottom:1px solid rgba(255,255,255,.07)}
   .nav a.btn{margin-top:.9rem;justify-content:center;border-bottom:0}
+}
+@media (max-width:760px){
   .cards,.steps,.contact-grid,.form-grid,.quoter-fields{grid-template-columns:1fr}
   .field-wide{grid-column:auto}
   .footer-inner{grid-template-columns:1fr;gap:2rem}
@@ -447,6 +489,10 @@ a.contact-card:hover{background:rgba(255,255,255,.1);transform:translateY(-6px);
   .wa-label{display:none}
   .wa-float{padding:14px;border-radius:50%}
   .hero-stats{gap:1.4rem}
+}
+@media (max-width:430px){
+  .values-grid{grid-template-columns:1fr;gap:2.2rem 0}
+  .value{padding-inline:.5rem}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -520,28 +566,131 @@ a.contact-card:hover{background:rgba(255,255,255,.1);transform:translateY(-6px);
     </div>
 
     <div class="hero-art" aria-hidden="true">
-      <div class="blueprint">
-        <svg viewBox="0 0 320 320" class="frame-svg">
-          <g class="frame-lines">
-            <rect x="40" y="40" width="240" height="240"/>
-            <line x1="40" y1="100" x2="280" y2="100"/>
-            <line x1="40" y1="160" x2="280" y2="160"/>
-            <line x1="40" y1="220" x2="280" y2="220"/>
-            <line x1="100" y1="40" x2="100" y2="280"/>
-            <line x1="160" y1="40" x2="160" y2="280"/>
-            <line x1="220" y1="40" x2="220" y2="280"/>
-            <line x1="40" y1="40" x2="160" y2="160"/>
-            <line x1="280" y1="40" x2="160" y2="160"/>
-            <line x1="40" y1="280" x2="160" y2="160"/>
-            <line x1="280" y1="280" x2="160" y2="160"/>
-          </g>
-          <g class="frame-nodes">
-            <circle cx="40" cy="40" r="6"/><circle cx="160" cy="40" r="6"/><circle cx="280" cy="40" r="6"/>
-            <circle cx="40" cy="160" r="6"/><circle cx="160" cy="160" r="7"/><circle cx="280" cy="160" r="6"/>
-            <circle cx="40" cy="280" r="6"/><circle cx="160" cy="280" r="6"/><circle cx="280" cy="280" r="6"/>
-          </g>
+      <figure class="blueprint">
+        <svg class="sketch" viewBox="2 -57 370 385" preserveAspectRatio="xMidYMid meet">
+        <polygon class="sk terreno" data-p="0" points="196,150 336.3,231 242.8,285 102.5,204"/>
+        <line class="sk terreno-h" data-p="0" x1="113" y1="210.1" x2="93.4" y2="210.1"/>
+        <line class="sk terreno-h" data-p="0" x1="325.8" y1="237.1" x2="345.4" y2="237.1"/>
+        <line class="sk terreno-h" data-p="0" x1="127.5" y1="218.4" x2="107.8" y2="218.4"/>
+        <line class="sk terreno-h" data-p="0" x1="311.3" y1="245.4" x2="330.9" y2="245.4"/>
+        <line class="sk terreno-h" data-p="0" x1="142" y1="226.8" x2="122.3" y2="226.8"/>
+        <line class="sk terreno-h" data-p="0" x1="296.8" y1="253.8" x2="316.4" y2="253.8"/>
+        <line class="sk terreno-h" data-p="0" x1="156.5" y1="235.2" x2="136.8" y2="235.2"/>
+        <line class="sk terreno-h" data-p="0" x1="282.3" y1="262.2" x2="301.9" y2="262.2"/>
+        <line class="sk terreno-h" data-p="0" x1="171" y1="243.6" x2="151.3" y2="243.6"/>
+        <line class="sk terreno-h" data-p="0" x1="267.8" y1="270.6" x2="287.4" y2="270.6"/>
+        <line class="sk terreno-h" data-p="0" x1="185.5" y1="251.9" x2="165.8" y2="251.9"/>
+        <line class="sk terreno-h" data-p="0" x1="253.3" y1="278.9" x2="272.9" y2="278.9"/>
+        <line class="sk terreno-h" data-p="0" x1="200" y1="260.3" x2="180.3" y2="260.3"/>
+        <polygon class="sk zapata" data-p="1" points="196,136.5 219.4,150 196,163.5 172.6,150"/>
+        <line class="sk zapata" data-p="1" x1="219.4" y1="150" x2="219.4" y2="161.3"/>
+        <line class="sk zapata" data-p="1" x1="196" y1="163.5" x2="196" y2="174.8"/>
+        <line class="sk zapata" data-p="1" x1="172.6" y1="150" x2="172.6" y2="161.3"/>
+        <polyline class="sk zapata" data-p="1" points="219.4,161.3 196,174.8 172.6,161.3"/>
+        <polygon class="sk zapata" data-p="1" points="102.5,190.5 125.9,204 102.5,217.5 79.1,204"/>
+        <line class="sk zapata" data-p="1" x1="125.9" y1="204" x2="125.9" y2="215.3"/>
+        <line class="sk zapata" data-p="1" x1="102.5" y1="217.5" x2="102.5" y2="228.8"/>
+        <line class="sk zapata" data-p="1" x1="79.1" y1="204" x2="79.1" y2="215.3"/>
+        <polyline class="sk zapata" data-p="1" points="125.9,215.3 102.5,228.8 79.1,215.3"/>
+        <polygon class="sk zapata" data-p="1" points="266.1,177 289.5,190.5 266.1,204 242.8,190.5"/>
+        <line class="sk zapata" data-p="1" x1="289.5" y1="190.5" x2="289.5" y2="201.8"/>
+        <line class="sk zapata" data-p="1" x1="266.1" y1="204" x2="266.1" y2="215.3"/>
+        <line class="sk zapata" data-p="1" x1="242.8" y1="190.5" x2="242.8" y2="201.8"/>
+        <polyline class="sk zapata" data-p="1" points="289.5,201.8 266.1,215.3 242.8,201.8"/>
+        <polygon class="sk zapata" data-p="1" points="172.6,231 196,244.5 172.6,258 149.2,244.5"/>
+        <line class="sk zapata" data-p="1" x1="196" y1="244.5" x2="196" y2="255.8"/>
+        <line class="sk zapata" data-p="1" x1="172.6" y1="258" x2="172.6" y2="269.3"/>
+        <line class="sk zapata" data-p="1" x1="149.2" y1="244.5" x2="149.2" y2="255.8"/>
+        <polyline class="sk zapata" data-p="1" points="196,255.8 172.6,269.3 149.2,255.8"/>
+        <polygon class="sk zapata" data-p="1" points="336.3,217.5 359.7,231 336.3,244.5 312.9,231"/>
+        <line class="sk zapata" data-p="1" x1="359.7" y1="231" x2="359.7" y2="242.3"/>
+        <line class="sk zapata" data-p="1" x1="336.3" y1="244.5" x2="336.3" y2="255.8"/>
+        <line class="sk zapata" data-p="1" x1="312.9" y1="231" x2="312.9" y2="242.3"/>
+        <polyline class="sk zapata" data-p="1" points="359.7,242.3 336.3,255.8 312.9,242.3"/>
+        <polygon class="sk zapata" data-p="1" points="242.8,271.5 266.1,285 242.8,298.5 219.4,285"/>
+        <line class="sk zapata" data-p="1" x1="266.1" y1="285" x2="266.1" y2="296.3"/>
+        <line class="sk zapata" data-p="1" x1="242.8" y1="298.5" x2="242.8" y2="309.8"/>
+        <line class="sk zapata" data-p="1" x1="219.4" y1="285" x2="219.4" y2="296.3"/>
+        <polyline class="sk zapata" data-p="1" points="266.1,296.3 242.8,309.8 219.4,296.3"/>
+        <line class="sk pilar" data-p="2" x1="196" y1="150" x2="196" y2="69"/>
+        <line class="sk pilar-b" data-p="2" x1="196" y1="154.9" x2="196" y2="73.9"/>
+        <line class="sk pilar" data-p="2" x1="102.5" y1="204" x2="102.5" y2="123"/>
+        <line class="sk pilar-b" data-p="2" x1="102.5" y1="208.9" x2="102.5" y2="127.9"/>
+        <line class="sk pilar" data-p="2" x1="266.1" y1="190.5" x2="266.1" y2="109.5"/>
+        <line class="sk pilar-b" data-p="2" x1="266.1" y1="195.4" x2="266.1" y2="114.4"/>
+        <line class="sk pilar" data-p="2" x1="172.6" y1="244.5" x2="172.6" y2="163.5"/>
+        <line class="sk pilar-b" data-p="2" x1="172.6" y1="249.4" x2="172.6" y2="168.4"/>
+        <line class="sk pilar" data-p="2" x1="336.3" y1="231" x2="336.3" y2="150"/>
+        <line class="sk pilar-b" data-p="2" x1="336.3" y1="235.9" x2="336.3" y2="154.9"/>
+        <line class="sk pilar" data-p="2" x1="242.8" y1="285" x2="242.8" y2="204"/>
+        <line class="sk pilar-b" data-p="2" x1="242.8" y1="289.9" x2="242.8" y2="208.9"/>
+        <line class="sk pilar" data-p="4" x1="196" y1="69" x2="196" y2="-12"/>
+        <line class="sk pilar-b" data-p="4" x1="196" y1="73.9" x2="196" y2="-7.1"/>
+        <line class="sk pilar" data-p="4" x1="102.5" y1="123" x2="102.5" y2="42"/>
+        <line class="sk pilar-b" data-p="4" x1="102.5" y1="127.9" x2="102.5" y2="46.9"/>
+        <line class="sk pilar" data-p="4" x1="266.1" y1="109.5" x2="266.1" y2="28.5"/>
+        <line class="sk pilar-b" data-p="4" x1="266.1" y1="114.4" x2="266.1" y2="33.4"/>
+        <line class="sk pilar" data-p="4" x1="172.6" y1="163.5" x2="172.6" y2="82.5"/>
+        <line class="sk pilar-b" data-p="4" x1="172.6" y1="168.4" x2="172.6" y2="87.4"/>
+        <line class="sk pilar" data-p="4" x1="336.3" y1="150" x2="336.3" y2="69"/>
+        <line class="sk pilar-b" data-p="4" x1="336.3" y1="154.9" x2="336.3" y2="73.9"/>
+        <line class="sk pilar" data-p="4" x1="242.8" y1="204" x2="242.8" y2="123"/>
+        <line class="sk pilar-b" data-p="4" x1="242.8" y1="208.9" x2="242.8" y2="127.9"/>
+        <line class="sk viga" data-p="3" x1="196" y1="69" x2="336.3" y2="150"/>
+        <line class="sk viga" data-p="3" x1="102.5" y1="123" x2="242.8" y2="204"/>
+        <line class="sk viga" data-p="3" x1="196" y1="69" x2="102.5" y2="123"/>
+        <line class="sk viga" data-p="3" x1="266.1" y1="109.5" x2="172.6" y2="163.5"/>
+        <line class="sk viga" data-p="3" x1="336.3" y1="150" x2="242.8" y2="204"/>
+        <polygon class="sk losa" data-p="3" points="196,69 336.3,150 242.8,204 102.5,123"/>
+        <polyline class="sk losa-canto" data-p="3" points="336.3,156.5 242.8,210.5 102.5,129.5"/>
+        <line class="sk losa-canto" data-p="3" x1="336.3" y1="150" x2="336.3" y2="156.5"/>
+        <line class="sk losa-canto" data-p="3" x1="242.8" y1="204" x2="242.8" y2="210.5"/>
+        <line class="sk losa-canto" data-p="3" x1="102.5" y1="123" x2="102.5" y2="129.5"/>
+        <line class="sk viga" data-p="5" x1="196" y1="-12" x2="336.3" y2="69"/>
+        <line class="sk viga" data-p="5" x1="102.5" y1="42" x2="242.8" y2="123"/>
+        <line class="sk viga" data-p="5" x1="196" y1="-12" x2="102.5" y2="42"/>
+        <line class="sk viga" data-p="5" x1="266.1" y1="28.5" x2="172.6" y2="82.5"/>
+        <line class="sk viga" data-p="5" x1="336.3" y1="69" x2="242.8" y2="123"/>
+        <polygon class="sk losa" data-p="5" points="196,-12 336.3,69 242.8,123 102.5,42"/>
+        <polyline class="sk losa-canto" data-p="5" points="336.3,75.5 242.8,129.5 102.5,48.5"/>
+        <line class="sk losa-canto" data-p="5" x1="336.3" y1="69" x2="336.3" y2="75.5"/>
+        <line class="sk losa-canto" data-p="5" x1="242.8" y1="123" x2="242.8" y2="129.5"/>
+        <line class="sk losa-canto" data-p="5" x1="102.5" y1="42" x2="102.5" y2="48.5"/>
+        <polygon class="sk cubierta" data-p="6" points="196,-44.9 355.9,47.4 242.8,112.7 82.8,20.4"/>
+        <line class="sk cubierta" data-p="6" x1="196" y1="-23.3" x2="196" y2="-44.9"/>
+        <line class="sk cubierta" data-p="6" x1="355.9" y1="69" x2="355.9" y2="47.4"/>
+        <line class="sk cubierta" data-p="6" x1="242.8" y1="134.3" x2="242.8" y2="112.7"/>
+        <line class="sk cubierta" data-p="6" x1="82.8" y1="42" x2="82.8" y2="20.4"/>
+        <polygon class="sk vano" data-p="7" points="116.5,195.9 146.9,213.4 146.9,159.4 116.5,141.9"/>
+        <polygon class="sk vano" data-p="7" points="160.9,221.6 191.3,239.1 191.3,185.1 160.9,167.6"/>
+        <polygon class="sk vano" data-p="7" points="205.4,247.2 235.8,264.7 235.8,210.7 205.4,193.2"/>
+        <polygon class="sk vano" data-p="7" points="322.3,222.9 291.9,240.4 291.9,186.4 322.3,168.9"/>
+        <polygon class="sk vano" data-p="7" points="277.8,248.6 247.4,266.1 247.4,212.1 277.8,194.6"/>
+        <polygon class="sk vano" data-p="7" points="116.5,114.9 146.9,132.4 146.9,78.4 116.5,60.9"/>
+        <polygon class="sk vano" data-p="7" points="160.9,140.6 191.3,158.1 191.3,104.1 160.9,86.6"/>
+        <polygon class="sk vano" data-p="7" points="205.4,166.2 235.8,183.7 235.8,129.7 205.4,112.2"/>
+        <polygon class="sk vano" data-p="7" points="322.3,141.9 291.9,159.4 291.9,105.4 322.3,87.9"/>
+        <polygon class="sk vano" data-p="7" points="277.8,167.6 247.4,185.1 247.4,131.1 277.8,113.6"/>
+        <line class="sk cota" data-p="8" x1="58" y1="229.6" x2="198.3" y2="310.6"/>
+        <line class="sk cota-aux" data-p="8" x1="95.5" y1="208" x2="48.7" y2="235.1"/>
+        <line class="sk cota-aux" data-p="8" x1="235.8" y1="289" x2="189" y2="316"/>
+        <line class="sk cota" data-p="8" x1="58" y1="178.3" x2="58" y2="97.3"/>
+        <line class="sk cota-aux" data-p="8" x1="95.5" y1="199.9" x2="48.7" y2="172.9"/>
+        <line class="sk cota-aux" data-p="8" x1="95.5" y1="118.9" x2="48.7" y2="91.9"/>
+        <line class="sk cota" data-p="8" x1="58" y1="97.3" x2="58" y2="16.3"/>
+        <line class="sk cota-aux" data-p="8" x1="95.5" y1="118.9" x2="48.7" y2="91.9"/>
+        <line class="sk cota-aux" data-p="8" x1="95.5" y1="37.9" x2="48.7" y2="10.9"/>
+        <text class="sk-txt" data-p="8" x="101.3" y="285.7" text-anchor="middle">6,00</text>
+        <text class="sk-txt" data-p="8" x="44" y="129.8" text-anchor="end">3,00</text>
+        <text class="sk-txt" data-p="8" x="44" y="48.8" text-anchor="end">3,00</text>
+        <text class="sk-txt sk-nivel" data-p="8" x="242.8" y="310.6" text-anchor="start">N.P.T. ±0,00</text>
         </svg>
-      </div>
+        <figcaption class="blueprint-pie">
+          <span class="bp-rot">Estructura tipo · hormigón armado</span>
+          <span class="bp-esc">esc. referencial</span>
+        </figcaption>
+      </figure>
+    </div>
     </div>
   </div>
 </section>
@@ -724,6 +873,7 @@ a.contact-card:hover{background:rgba(255,255,255,.1);transform:translateY(-6px);
         <p class="quoter-label">Rango referencial estimado</p>
         <p class="quoter-value"><span id="q-min">—</span> <span class="sep">a</span> <span id="q-max">—</span></p>
         <p class="quoter-uf" id="q-uf"></p>
+        <p class="quoter-fuente" id="q-fuente">Consultando el valor de la UF…</p>
         <p class="quoter-note">Valor referencial calculado automáticamente. <strong>No constituye una cotización formal</strong> ni compromiso comercial: depende de la complejidad, el terreno y los antecedentes del proyecto.</p>
         <a class="btn btn-gold btn-block" href="#solicitud" id="q-send">Pedir cotización formal</a>
       </div>
@@ -1007,7 +1157,11 @@ const CONFIG = {
      El resultado se muestra siempre como un rango (±25%) y con el
      aviso de que no constituye una cotización formal.
   ------------------------------------------------------------- */
-  ufValor: 39500,          // Valor de la UF en pesos (actualízalo cuando quieras)
+
+  // La UF se consulta sola a mindicador.cl (API pública, sin registro).
+  // Este número solo se usa si la consulta falla; conviene refrescarlo
+  // de vez en cuando para que el respaldo no quede muy viejo.
+  ufValor: 40844.79,
   tarifaBase: {            // UF por m² — cálculo estructural
     vivienda:   0.20,
     ampliacion: 0.26,
@@ -1022,7 +1176,9 @@ const CONFIG = {
     madera:      0.95,
     mixto:       1.10
   },
-  minimoUF: 12             // Cobro mínimo referencial del servicio (UF)
+  minimoUF: 12,            // Cobro mínimo referencial del servicio (UF)
+
+  ufApi: 'https://mindicador.cl/api/uf'
 };
 
 /* ============================================================
@@ -1075,6 +1231,104 @@ if ('IntersectionObserver' in window) {
   reveals.forEach(el => io.observe(el));
 } else {
   reveals.forEach(el => el.classList.add('visible'));
+}
+
+/* ============================================================
+   2b. El sketch estructural se dibuja solo
+   ------------------------------------------------------------
+   Cada trazo lleva data-p con su etapa de obra. Se dibuja en el
+   orden real de construcción: terreno, zapatas, pilares del 1er
+   nivel, vigas y losa, pilares del 2º, losa, cubierta, vanos y
+   por último las cotas.
+   ============================================================ */
+const sketch = document.querySelector('.sketch');
+
+// Segundo en que arranca cada etapa
+const ETAPAS = [0, 0.5, 1.2, 2.0, 2.8, 3.5, 4.2, 4.8, 5.3];
+
+/* Los trazos usan vector-effect:non-scaling-stroke, así que el patrón de
+   guiones se mide en píxeles de pantalla, mientras que getTotalLength()
+   devuelve unidades del viewBox. Esta es la razón entre ambos. */
+function escalaSketch() {
+  const vb = sketch?.viewBox?.baseVal;
+  const ancho = sketch?.getBoundingClientRect().width;
+  return (vb?.width && ancho) ? ancho / vb.width : 1;
+}
+
+function dibujarSketch() {
+  if (!sketch) return;
+
+  const trazos = [...sketch.querySelectorAll('.sk')];
+  const textos = [...sketch.querySelectorAll('.sk-txt')];
+  const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (quieto) {
+    trazos.forEach(t => { t.style.strokeDasharray = ''; t.style.strokeDashoffset = ''; });
+    textos.forEach(t => { t.style.opacity = '1'; });
+    return;
+  }
+
+  // 1. Estado inicial: cada trazo oculto, todavía sin transición
+  const cuenta = {};
+  const espera = new Map();
+
+  trazos.forEach(el => {
+    const etapa = Number(el.dataset.p) || 0;
+    cuenta[etapa] = (cuenta[etapa] || 0) + 1;
+
+    // Pequeño desfase dentro de la etapa: se siente trazado a mano
+    espera.set(el, ETAPAS[etapa] + cuenta[etapa] * 0.022);
+
+    let largo = 0;
+    try { largo = el.getTotalLength(); } catch { largo = 0; }
+
+    el.style.transition = 'none';
+    if (largo) {
+      // El trazo se escala con el SVG, así que el patrón de guiones se mide
+      // en píxeles de pantalla: hay que llevar el largo a esa misma escala.
+      const l = largo * escalaSketch() + 1;
+      el.style.strokeDasharray  = l;
+      el.style.strokeDashoffset = l;
+    } else {
+      el.style.opacity = '0';           // navegador sin getTotalLength
+    }
+  });
+
+  textos.forEach(t => { t.style.transition = 'none'; t.style.opacity = '0'; });
+
+  // 2. Forzar el recálculo para que el navegador registre ese estado inicial.
+  //    Sin esto, el salto al valor final ocurre sin animación.
+  void sketch.getBoundingClientRect();
+
+  // 3. Estado final: ahora sí, con transición y su retardo por etapa
+  trazos.forEach(el => {
+    const d = espera.get(el);
+    if (el.style.strokeDasharray) {
+      el.style.transition = `stroke-dashoffset .8s cubic-bezier(.45,.05,.35,1) ${d}s`;
+      el.style.strokeDashoffset = '0';
+    } else {
+      el.style.transition = `opacity .5s ease ${d}s`;
+      el.style.opacity = '1';
+    }
+  });
+
+  textos.forEach((t, i) => {
+    t.style.transition = `opacity .7s ease ${ETAPAS[8] + 0.3 + i * 0.14}s`;
+    t.style.opacity = '1';
+  });
+}
+
+// Se dibuja al cargar y se vuelve a dibujar si el visitante regresa arriba
+if (sketch && 'IntersectionObserver' in window) {
+  let dentro = false;
+  new IntersectionObserver(entradas => {
+    entradas.forEach(e => {
+      if (e.isIntersecting && !dentro) { dentro = true; dibujarSketch(); }
+      else if (!e.isIntersecting) { dentro = false; }
+    });
+  }, { threshold: 0.3 }).observe(sketch);
+} else {
+  dibujarSketch();
 }
 
 /* ============================================================
@@ -1145,6 +1399,61 @@ function calcular() {
   el?.addEventListener('change', calcular);
 });
 calcular();
+
+/* ============================================================
+   4b. Valor de la UF, al día
+   ------------------------------------------------------------
+   Se consulta mindicador.cl (API pública chilena, sin registro).
+   El resultado se guarda para el resto del día, así una segunda
+   visita no vuelve a pedirlo. Si la consulta falla —sin internet,
+   servicio caído— se usa CONFIG.ufValor y se avisa en pantalla.
+   ============================================================ */
+const qFuente = document.getElementById('q-fuente');
+
+const soloFecha = d => d.toISOString().slice(0, 10);
+
+function mostrarUF(valor, fecha, enVivo) {
+  CONFIG.ufValor = valor;
+  calcular();
+  if (!qFuente) return;
+
+  const monto = valor.toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  qFuente.classList.toggle('en-vivo', Boolean(enVivo));
+  qFuente.textContent = enVivo
+    ? `UF de hoy: $${monto} · ${fecha}`
+    : `UF de referencia: $${monto} (no se pudo consultar el valor de hoy)`;
+}
+
+function leerCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem('mg_uf') || 'null');
+    return c && c.dia === soloFecha(new Date()) ? c : null;
+  } catch { return null; }
+}
+
+async function cargarUF() {
+  const cache = leerCache();
+  if (cache) { mostrarUF(cache.valor, cache.fecha, true); return; }
+
+  try {
+    const r = await fetch(CONFIG.ufApi, { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+
+    const dato = (await r.json())?.serie?.[0];
+    if (!dato || !Number.isFinite(dato.valor)) throw new Error('respuesta inesperada');
+
+    const fecha = new Date(dato.fecha).toLocaleDateString('es-CL');
+    try {
+      localStorage.setItem('mg_uf',
+        JSON.stringify({ dia: soloFecha(new Date()), valor: dato.valor, fecha }));
+    } catch { /* modo privado: seguimos igual, solo sin recordar */ }
+
+    mostrarUF(dato.valor, fecha, true);
+  } catch {
+    mostrarUF(CONFIG.ufValor, null, false);
+  }
+}
+cargarUF();
 
 /* Botón del cotizador: precarga el formulario con lo seleccionado */
 document.getElementById('q-send')?.addEventListener('click', () => {
