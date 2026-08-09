@@ -88,7 +88,7 @@ ul{margin:0;padding:0;list-style:none}
 .site-header.scrolled{background:rgba(6,21,48,.97);box-shadow:0 8px 30px rgba(0,0,0,.28)}
 .header-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:76px}
 .brand{display:flex;align-items:center;gap:.7rem}
-.brand-mark{flex:none}
+.brand-mark{flex:none;height:52px;width:auto}
 .brand-text{display:flex;flex-direction:column;line-height:1}
 .brand-name{color:#fff;font-weight:600;font-size:.95rem;letter-spacing:.34em}
 .brand-tag{color:var(--gold-300);font-size:.53rem;letter-spacing:.24em;text-transform:uppercase;margin-top:5px}
@@ -404,6 +404,7 @@ a.contact-card:hover{background:rgba(255,255,255,.1);transform:translateY(-6px);
 /* ───────── Footer ───────── */
 .site-footer{background:var(--navy-900);color:rgba(255,255,255,.6);padding-top:3.5rem}
 .footer-inner{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:2.5rem;padding-bottom:2.5rem}
+.footer-brand img{display:block;height:96px;width:auto}
 .footer-tag{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-300);margin-top:.8rem}
 .site-footer h4{color:#fff;font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:1rem}
 .site-footer li{margin-bottom:.55rem;font-size:.9rem}
@@ -468,6 +469,10 @@ a.contact-card:hover{background:rgba(255,255,255,.1);transform:translateY(-6px);
 @media (max-width:430px){
   .values-grid{grid-template-columns:1fr;gap:2.2rem 0}
   .value{padding-inline:.5rem}
+  /* En pantallas angostas el logo y el nombre compiten con el botón de menú */
+  .brand-mark{height:42px}
+  .brand-name{font-size:.82rem;letter-spacing:.24em}
+  .brand-tag{font-size:.48rem;letter-spacing:.18em}
 }
 
 @media (prefers-reduced-motion:reduce){

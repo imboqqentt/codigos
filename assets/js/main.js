@@ -14,11 +14,9 @@ const CONFIG = {
      Cada fila es un tramo de superficie; el orden de los precios
      sigue al de MATERIALES.
 
-     Lo que NO está aquí, y es deliberado: este archivo lo puede
-     abrir cualquiera desde el navegador, así que no incluye ningún
-     factor de uso interno (recargos por complejidad, organismo,
-     urgencia o tipo de cliente, ni precios de lanzamiento).
-     Solo los precios base que ya se le cotizan al cliente.
+     Este archivo lo puede abrir cualquiera desde el navegador, así
+     que aquí van solo los precios base que ya se le cotizan al
+     cliente. Nada de uso interno.
   ------------------------------------------------------------- */
 
   // La UF se consulta sola a mindicador.cl (API pública, sin registro).
