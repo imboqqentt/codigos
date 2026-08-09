@@ -47,14 +47,34 @@ mediante un campo oculto (*honeypot*).
 Todo lo configurable está al inicio de `assets/js/main.js`, en el bloque `CONFIG`:
 
 ```js
-whatsapp: '56996761602',              // sin "+" ni espacios
+whatsapp: '56996761602',        // sin "+" ni espacios
 email:    'ingenieria.mg25@gmail.com',
-ufValor:  40844.79,                   // solo respaldo: la UF se consulta sola
-tarifaBase: { vivienda: 0.20, ... },  // UF por m² de cada tipo de proyecto
-factorMaterial: { hormigon: 1.15, ... },
-minimoUF: 12,                         // cobro mínimo referencial
-ufApi: 'https://mindicador.cl/api/uf'
+ufValor:  40844.79,             // solo respaldo: la UF se consulta sola
+habitacional: [ ... ],          // tabla de precios por tramo y materialidad
+ampliacion:   [ ... ],          // tabla propia, bajo 100 m²
+adicionales:  { eett: {...}, cubicacion: {...} },
+holgura: 0.25                   // cuánto se abre el rango hacia arriba
 ```
+
+### Qué precios están publicados y cuáles no
+
+El cotizador usa los **precios base** de la tabla de tarifas 2026 para proyectos
+habitacionales y ampliaciones, más dos adicionales (especificaciones técnicas y cubicación
+de materiales).
+
+**Deliberadamente no incluye nada de uso interno**: factores por complejidad, organismo
+(Dirección de Tránsito, SERVIU, Vialidad), urgencia o tipo de cliente; el factor minería;
+ni los precios de lanzamiento frente a los objetivo. Este archivo lo puede abrir cualquiera
+desde el navegador, así que todo lo que se ponga en él queda público, no solo lo que se ve
+en pantalla.
+
+Tampoco están las tablas de estructura industrial, torres de acero ni acceso vehicular:
+esas consultas se canalizan por el formulario.
+
+El resultado se muestra como **un rango que parte en el precio de tabla y se abre un 25%
+hacia arriba** (`holgura`), nunca por debajo, para dejar espacio a alcance, antecedentes y
+condiciones de cada obra. Fuera de tabla —sobre 500 m², o ampliaciones sobre 99 m²— muestra
+"A convenir" e invita a escribir.
 
 ### El valor de la UF se actualiza solo
 

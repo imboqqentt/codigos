@@ -352,34 +352,31 @@
         <div class="field">
           <label for="q-tipo">Tipo de proyecto</label>
           <select id="q-tipo">
-            <option value="vivienda">Vivienda unifamiliar</option>
-            <option value="ampliacion">Ampliación o remodelación</option>
-            <option value="edificio">Edificio / multifamiliar</option>
-            <option value="industrial">Nave industrial / bodega</option>
-            <option value="otro">Otro tipo de obra</option>
+            <option value="habitacional">Vivienda u obra habitacional</option>
+            <option value="ampliacion">Ampliación de vivienda</option>
           </select>
         </div>
         <div class="field">
-          <label for="q-material">Material principal</label>
+          <label for="q-material">Materialidad principal</label>
           <select id="q-material">
-            <option value="albanileria">Albañilería</option>
+            <option value="albanileria">Albañilería confinada</option>
+            <option value="piedra">Muros de piedra</option>
             <option value="hormigon">Hormigón armado</option>
             <option value="acero">Estructura de acero</option>
-            <option value="madera">Madera</option>
+            <option value="metalcon">Metalcon</option>
+            <option value="sip">Paneles SIP</option>
             <option value="mixto">Mixto</option>
           </select>
         </div>
         <div class="field field-wide">
           <label for="q-m2">Superficie aproximada: <output id="q-m2-out">120</output> m²</label>
-          <input type="range" id="q-m2" min="20" max="2000" step="10" value="120">
+          <input type="range" id="q-m2" min="20" max="600" step="5" value="120">
         </div>
         <div class="field field-wide">
-          <span class="label">Servicios requeridos</span>
+          <span class="label">¿Agregar algo más?</span>
           <div class="chips">
-            <label class="chip"><input type="checkbox" value="Cálculo estructural" data-f="1" checked><span>Cálculo estructural</span></label>
-            <label class="chip"><input type="checkbox" value="Planos estructurales" data-f="0.55" checked><span>Planos estructurales</span></label>
-            <label class="chip"><input type="checkbox" value="Supervisión técnica" data-f="0.45"><span>Supervisión técnica</span></label>
-            <label class="chip"><input type="checkbox" value="Asesoría profesional" data-f="0.2"><span>Asesoría</span></label>
+            <label class="chip"><input type="checkbox" id="q-eett" value="Especificaciones técnicas"><span>Especificaciones técnicas</span></label>
+            <label class="chip"><input type="checkbox" id="q-cub" value="Cubicación de materiales"><span>Cubicación de materiales</span></label>
           </div>
         </div>
       </div>

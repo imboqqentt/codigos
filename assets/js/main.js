@@ -10,33 +10,54 @@ const CONFIG = {
   email: 'ingenieria.mg25@gmail.com',
 
   /* ---- Cotizador estimativo ----------------------------------
-     Valores REFERENCIALES en UF por m² para el cálculo estructural.
-     ⚠️ AJUSTA estos números a tus tarifas reales antes de publicar.
-     El resultado se muestra siempre como un rango (±25%) y con el
-     aviso de que no constituye una cotización formal.
+     Precios base en pesos, tomados de la tabla de tarifas 2026.
+     Cada fila es un tramo de superficie; el orden de los precios
+     sigue al de MATERIALES.
+
+     Lo que NO está aquí, y es deliberado: este archivo lo puede
+     abrir cualquiera desde el navegador, así que no incluye ningún
+     factor de uso interno (recargos por complejidad, organismo,
+     urgencia o tipo de cliente, ni precios de lanzamiento).
+     Solo los precios base que ya se le cotizan al cliente.
   ------------------------------------------------------------- */
 
   // La UF se consulta sola a mindicador.cl (API pública, sin registro).
   // Este número solo se usa si la consulta falla; conviene refrescarlo
   // de vez en cuando para que el respaldo no quede muy viejo.
   ufValor: 40844.79,
-  tarifaBase: {            // UF por m² — cálculo estructural
-    vivienda:   0.20,
-    ampliacion: 0.26,
-    edificio:   0.15,
-    industrial: 0.13,
-    otro:       0.20
-  },
-  factorMaterial: {        // Multiplicador según material principal
-    albanileria: 1.00,
-    hormigon:    1.15,
-    acero:       1.20,
-    madera:      0.95,
-    mixto:       1.10
-  },
-  minimoUF: 12,            // Cobro mínimo referencial del servicio (UF)
+  ufApi: 'https://mindicador.cl/api/uf',
 
-  ufApi: 'https://mindicador.cl/api/uf'
+  materiales: ['sip', 'metalcon', 'albanileria', 'piedra', 'hormigon', 'acero', 'mixto'],
+
+  // Proyectos habitacionales y similares
+  habitacional: [
+    { hasta:  30, precios: [ 450000,  500000,  560000,  560000,  650000,  620000,  700000] },
+    { hasta:  60, precios: [ 580000,  650000,  720000,  720000,  850000,  820000,  950000] },
+    { hasta:  99, precios: [ 700000,  780000,  860000,  860000, 1000000,  960000, 1150000] },
+    { hasta: 120, precios: [ 780000,  850000,  920000,  920000, 1100000, 1050000, 1250000] },
+    { hasta: 160, precios: [ 900000,  990000, 1080000, 1080000, 1300000, 1250000, 1500000] },
+    { hasta: 220, precios: [1100000, 1200000, 1320000, 1320000, 1600000, 1550000, 1850000] },
+    { hasta: 300, precios: [1350000, 1480000, 1620000, 1620000, 1950000, 1900000, 2250000] },
+    { hasta: 400, precios: [1650000, 1800000, 1950000, 1950000, 2350000, 2350000, 2700000] },
+    { hasta: 500, precios: [1950000, 2100000, 2300000, 2300000, 2750000, 2800000, 3200000] }
+  ],
+
+  // Ampliaciones de vivienda (tabla propia, solo bajo 100 m²)
+  ampliacion: [
+    { hasta:  30, precios: [ 450000,  500000,  560000,  560000,  650000,  620000,  700000] },
+    { hasta:  60, precios: [ 650000,  720000,  800000,  800000,  950000,  900000, 1050000] },
+    { hasta:  99, precios: [ 820000,  920000, 1020000, 1020000, 1200000, 1150000, 1350000] }
+  ],
+
+  // Adicionales que se calculan como porcentaje del proyecto, con mínimo
+  adicionales: {
+    eett:       { pct: 0.08, minimo: 120000 },
+    cubicacion: { pct: 0.12, minimo: 180000 }
+  },
+
+  // El precio de tabla es el piso; el rango mostrado se abre hacia arriba
+  // para dejar espacio a alcance, antecedentes y condiciones de cada obra.
+  holgura: 0.25
 };
 
 /* ============================================================
@@ -205,9 +226,12 @@ const qOut  = document.getElementById('q-m2-out');
 const qMin  = document.getElementById('q-min');
 const qMax  = document.getElementById('q-max');
 const qUf   = document.getElementById('q-uf');
-const qChips = document.querySelectorAll('#cotizador .chip input');
+const qEett = document.getElementById('q-eett');
+const qCub  = document.getElementById('q-cub');
+const qSep  = document.querySelector('.quoter-value .sep');
 
 const clp = n => '$' + Math.round(n).toLocaleString('es-CL');
+const aDecena = n => Math.ceil(n / 10000) * 10000;   // redondeo a la decena de mil
 
 function pintarSlider() {
   if (!qM2) return;
@@ -215,44 +239,60 @@ function pintarSlider() {
   qM2.style.setProperty('--pct', pct + '%');
 }
 
-function serviciosCotizador() {
-  return [...qChips].filter(c => c.checked);
+/* Precio base de tabla: primer tramo cuyo tope cubre la superficie.
+   Devuelve null si la obra queda fuera de tabla (se cotiza caso a caso). */
+function precioBase(tipo, m2, material) {
+  const tabla = CONFIG[tipo];
+  const col = CONFIG.materiales.indexOf(material);
+  if (!tabla || col < 0) return null;
+
+  const tramo = tabla.find(t => m2 <= t.hasta);
+  return tramo ? tramo.precios[col] : null;
+}
+
+function fueraDeTabla(mensaje) {
+  qMin.textContent = 'A convenir';
+  qMax.textContent = '';
+  if (qSep) qSep.style.display = 'none';
+  qUf.textContent = mensaje;
 }
 
 function calcular() {
   if (!qTipo) return;
 
-  const m2       = Number(qM2.value);
-  const base     = CONFIG.tarifaBase[qTipo.value] ?? 0.2;
-  const material = CONFIG.factorMaterial[qMat.value] ?? 1;
-  const factorServicios = serviciosCotizador()
-    .reduce((sum, c) => sum + Number(c.dataset.f), 0);
-
+  const m2 = Number(qM2.value);
   if (qOut) qOut.textContent = m2.toLocaleString('es-CL');
   pintarSlider();
 
-  if (factorServicios === 0) {
-    qMin.textContent = '—';
-    qMax.textContent = '';
-    qUf.textContent  = 'Selecciona al menos un servicio.';
+  const base = precioBase(qTipo.value, m2, qMat.value);
+
+  if (base === null) {
+    fueraDeTabla(qTipo.value === 'ampliacion'
+      ? 'Las ampliaciones sobre 99 m² las cotizamos caso a caso. Escríbenos y te respondemos con un valor cerrado.'
+      : 'Sobre 500 m² el valor depende mucho del proyecto. Cuéntanos los detalles y te cotizamos.');
     return;
   }
 
-  // Economía de escala: el valor por m² baja en proyectos grandes.
-  const escala = m2 > 300 ? Math.pow(300 / m2, 0.18) : 1;
+  if (qSep) qSep.style.display = '';
 
-  let uf = m2 * base * material * factorServicios * escala;
-  uf = Math.max(uf, CONFIG.minimoUF);
+  // Adicionales: porcentaje del proyecto, respetando su mínimo
+  let total = base;
+  const { eett, cubicacion } = CONFIG.adicionales;
+  if (qEett?.checked) total += Math.max(base * eett.pct, eett.minimo);
+  if (qCub?.checked)  total += Math.max(base * cubicacion.pct, cubicacion.minimo);
 
-  const ufMin = uf * 0.85;
-  const ufMax = uf * 1.25;
+  const min = total;
+  const max = aDecena(total * (1 + CONFIG.holgura));
 
-  qMin.textContent = clp(ufMin * CONFIG.ufValor);
-  qMax.textContent = clp(ufMax * CONFIG.ufValor);
-  qUf.textContent  = `Equivalente a ${ufMin.toFixed(1)} – ${ufMax.toFixed(1)} UF aprox.`;
+  const enUf = v => (v / CONFIG.ufValor)
+    .toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+  qMin.textContent = clp(min);
+  qMax.textContent = clp(max);
+  qUf.textContent  = `Equivalente a ${enUf(min)} – ${enUf(max)} UF aprox.`;
 }
 
-[qTipo, qMat, qM2, ...qChips].forEach(el => {
+[qTipo, qMat, qM2, qEett, qCub].forEach(el => {
   el?.addEventListener('input', calcular);
   el?.addEventListener('change', calcular);
 });
@@ -319,20 +359,27 @@ document.getElementById('q-send')?.addEventListener('click', () => {
   if (m2Field && qM2) m2Field.value = qM2.value;
 
   const mapaTipo = {
-    vivienda: 'Vivienda unifamiliar',
-    ampliacion: 'Ampliación o remodelación',
-    edificio: 'Edificio / multifamiliar',
-    industrial: 'Nave industrial / bodega',
-    otro: 'Otro'
+    habitacional: 'Vivienda unifamiliar',
+    ampliacion: 'Ampliación o remodelación'
   };
   const tipoField = document.getElementById('f-tipo');
   if (tipoField && qTipo) tipoField.value = mapaTipo[qTipo.value] ?? '';
 
-  const elegidos = serviciosCotizador().map(c => c.value);
+  // El proyecto estructural del cotizador cubre cálculo y planos
   document.querySelectorAll('#requestForm input[name="servicio"]').forEach(chk => {
-    // "Cálculo estructural" del cotizador ↔ "Cálculos estructurales" del formulario
-    chk.checked = elegidos.some(v => chk.value.startsWith(v.replace(/s$/, '')));
+    if (chk.value === 'Cálculos estructurales' || chk.value === 'Planos estructurales') {
+      chk.checked = true;
+    }
   });
+
+  // Materialidad y adicionales elegidos viajan en la descripción
+  const msg = document.getElementById('f-msg');
+  if (msg && !msg.value.trim()) {
+    const extras = [qEett?.checked && 'especificaciones técnicas',
+                    qCub?.checked && 'cubicación de materiales'].filter(Boolean);
+    msg.value = `Proyecto de ${qM2.value} m² en ${qMat.options[qMat.selectedIndex].text.toLowerCase()}.`
+      + (extras.length ? ` Necesito además ${extras.join(' y ')}.` : '');
+  }
 });
 
 /* Enlaces "Solicitar este servicio" de las tarjetas */
