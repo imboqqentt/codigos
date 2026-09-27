@@ -19,7 +19,9 @@ $10.000). No hay suscripciones escondidas.
 
 ## Antes de empezar, el cliente necesita
 
-1. Una **cuenta de GitHub** (gratis, en github.com). Anota el nombre de usuario exacto.
+1. Una **cuenta de GitHub**. Ya está creada: el usuario es **`ingenieriamg25-create`**
+   (github.com/ingenieriamg25-create). Ese nombre es el que se usa más abajo, y quedó
+   verificado.
 2. Una **cuenta de Cloudflare** (gratis, en cloudflare.com).
 3. Acceso a la **cuenta de NIC Chile** donde está inscrito el dominio, o disposición para
    hacer el cambio de titular.
@@ -56,16 +58,17 @@ git init
 git add .
 git commit -m "Sitio web MG Ingeniería"
 git branch -M main
-git remote add origin https://github.com/TU-USUARIO/mg-ingenieria-web.git
+git remote add origin https://github.com/imboqqentt/mg-ingenieria-web.git
 git push -u origin main
 ```
 
 **3. Transferir el repositorio al cliente.** En el repositorio nuevo:
 *Settings → General → abajo del todo, Danger Zone → Transfer ownership*.
-Se escribe el nombre de usuario de GitHub del cliente y se confirma.
+En el campo del nuevo dueño se escribe **`ingenieriamg25-create`** y se confirma.
 
 El cliente recibe un correo y tiene que **aceptar la transferencia**. Hasta que la acepte,
-no pasa nada.
+no pasa nada. Una vez aceptada, el repositorio queda en
+`https://github.com/ingenieriamg25-create/mg-ingenieria-web`.
 
 > Alternativa: si el cliente prefiere crear él mismo el repositorio, que lo haga vacío y
 > agregue a quien está haciendo la entrega como colaborador para subir los archivos. El
@@ -138,11 +141,11 @@ actuales pero con otros nombres). Los tiene que anotar.
 | A | `@` | `185.199.109.153` | DNS only |
 | A | `@` | `185.199.110.153` | DNS only |
 | A | `@` | `185.199.111.153` | DNS only |
-| CNAME | `www` | `USUARIO-DEL-CLIENTE.github.io` | DNS only |
+| CNAME | `www` | `ingenieriamg25-create.github.io` | DNS only |
 
 > **Atención con el último.** Hoy ese registro apunta a `imboqqentt.github.io`, que es la
-> cuenta actual. Cuando el repositorio cambie de dueño, hay que cambiarlo por el usuario de
-> GitHub del cliente, o `www` deja de funcionar.
+> cuenta actual. Al transferir el repositorio hay que cambiarlo por
+> `ingenieriamg25-create.github.io`, o `www` deja de funcionar.
 
 > Las cuatro direcciones A son de GitHub Pages y son las mismas para todos los sitios: no
 > cambian con el traspaso. El proxy tiene que quedar **desactivado** (nube gris), porque si
@@ -166,7 +169,7 @@ corta, pero conviene hacerlo un día de poco movimiento y no un viernes a las 18
 2. Transferirlo y que el cliente acepte *(sigue funcionando)*
 3. El cliente arma su zona en Cloudflare, sin tocar todavía los servidores de nombres *(sigue funcionando)*
 4. **Soltar el dominio en el repositorio antiguo y tomarlo en el nuevo** ← acá parte la ventana
-5. Ajustar el CNAME de `www` al usuario nuevo
+5. Ajustar el CNAME de `www` a `ingenieriamg25-create.github.io`
 6. Cambiar los servidores de nombres en nic.cl
 7. Esperar el certificado y marcar *Enforce HTTPS*
 
