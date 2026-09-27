@@ -1,17 +1,24 @@
 # MG Ingeniería — Sitio web
 
 Sitio web de una sola página para **MG Ingeniería · Cálculo Estructural** (Curicó, Chile).
+En línea en **https://mgingenieria.cl**.
+
 Es un sitio **estático**: solo HTML, CSS y JavaScript. No necesita servidor, base de datos ni
 instalar nada. Funciona abriendo `index.html` en cualquier navegador.
 
 ## Contenido
 
 ```
-index.html              Toda la página
-assets/css/styles.css   Estilos (colores, tipografías, diseño responsivo)
-assets/js/main.js       Interacción: formulario, cotizador, menú, animaciones
-assets/img/logo.svg     Logo MG reconstruido en vectores (se ve nítido a cualquier tamaño)
-assets/img/favicon.svg  Ícono de la pestaña del navegador
+index.html                       Toda la página
+assets/css/styles.css            Estilos (colores, tipografías, diseño responsivo)
+assets/js/main.js                Interacción: formulario, cotizador, menú, animaciones
+assets/img/logo-mg.png           Monograma MG de la cabecera
+assets/img/logo-mg-lockup.png    Logo completo del pie de página
+assets/img/favicon.png           Ícono de la pestaña del navegador
+assets/img/og.jpg                Imagen que se ve al compartir el sitio en redes
+CNAME                            El dominio, para GitHub Pages. No borrar
+construir.py                     Arma la versión de un solo archivo
+mg-ingenieria.html               Versión de un solo archivo, para abrir sin internet
 ```
 
 ## Secciones
@@ -42,7 +49,7 @@ tres caminos:
 Antes de enviar, el formulario valida los campos obligatorios y bloquea envíos automáticos de robots
 mediante un campo oculto (*honeypot*).
 
-## Qué debes ajustar antes de publicar
+## Qué se puede ajustar
 
 Todo lo configurable está al inicio de `assets/js/main.js`, en el bloque `CONFIG`:
 
@@ -56,17 +63,29 @@ adicionales:  { eett: {...}, cubicacion: {...} },
 holgura: 0.25                   // cuánto se abre el rango hacia arriba
 ```
 
+> El correo y el WhatsApp también aparecen escritos dentro de `index.html`: en las tarjetas de
+> contacto, en el pie de página, en el botón flotante y en el bloque de datos estructurados del
+> final. Si cambias uno, cámbialos todos.
+
+Otros datos que quizás quieras cambiar:
+
+| Qué | Dónde |
+|---|---|
+| Textos, servicios, preguntas frecuentes | `index.html` |
+| Horario de atención | `index.html`, sección Contacto y bloque de datos estructurados al final |
+| Colores | `assets/css/styles.css`, variables `--navy-*` y `--gold*` al inicio |
+
+Después de cualquier cambio, regenera la versión de un solo archivo con `python3 construir.py`.
+
 ### Qué precios están publicados y cuáles no
 
 El cotizador usa los **precios base** de la tabla de tarifas 2026 para proyectos
 habitacionales y ampliaciones, más dos adicionales (especificaciones técnicas y cubicación
 de materiales).
 
-**Deliberadamente no incluye nada de uso interno**: factores por complejidad, organismo
-(Dirección de Tránsito, SERVIU, Vialidad), urgencia o tipo de cliente; el factor minería;
-ni los precios de lanzamiento frente a los objetivo. Este archivo lo puede abrir cualquiera
-desde el navegador, así que todo lo que se ponga en él queda público, no solo lo que se ve
-en pantalla.
+**Deliberadamente no incluye nada de uso interno**: ni factores de ajuste, ni criterios de
+recargo, ni precios objetivo. Este archivo lo puede abrir cualquiera desde el navegador,
+así que todo lo que se ponga en él queda público, no solo lo que se ve en pantalla.
 
 Tampoco están las tablas de estructura industrial, torres de acero ni acceso vehicular:
 esas consultas se canalizan por el formulario.
@@ -75,6 +94,9 @@ El resultado se muestra como **un rango que parte en el precio de tabla y se abr
 hacia arriba** (`holgura`), nunca por debajo, para dejar espacio a alcance, antecedentes y
 condiciones de cada obra. Fuera de tabla —sobre 500 m², o ampliaciones sobre 99 m²— muestra
 "A convenir" e invita a escribir.
+
+Las tarifas publicadas se revisaron una por una contra la tabla 2026. Cuando cambien los
+precios, hay que actualizarlas en `CONFIG` y volver a publicar.
 
 ### El valor de la UF se actualiza solo
 
@@ -87,37 +109,29 @@ a pedirlo. Si la consulta falla —sin internet o servicio caído— se usa el n
 `ufValor` y la etiqueta avisa que es un valor de referencia. Conviene refrescar ese número
 de vez en cuando para que el respaldo no quede muy viejo.
 
-> **Importante:** las tarifas del cotizador son valores de ejemplo. **Reemplázalas por tus tarifas
-> reales antes de publicar el sitio.** El resultado siempre se muestra como un rango y con el aviso
-> de que no constituye una cotización formal, pero aun así conviene que los números sean tuyos.
+## Cómo está publicado
 
-Otros datos que quizás quieras cambiar:
+**GitHub Pages**, sirviendo la rama principal desde la raíz (*Settings → Pages → Deploy from a
+branch*). El archivo `CNAME` de la raíz es el que le dice a Pages cuál es el dominio: si se
+borra, el sitio vuelve a la dirección `*.github.io`.
 
-| Qué | Dónde |
-|---|---|
-| Textos, servicios, preguntas frecuentes | `index.html` |
-| Horario de atención | `index.html`, sección Contacto y bloque de datos estructurados al final |
-| Colores | `assets/css/styles.css`, variables `--navy-*` y `--gold*` al inicio |
-| Dirección web real | etiqueta `<link rel="canonical">` en `index.html` |
+El **DNS está en Cloudflare**, con los registros A del dominio apuntando a GitHub Pages y un
+CNAME para `www`. El certificado HTTPS lo emite GitHub automáticamente.
 
-## Cómo publicarlo
+> GitHub emite el certificado para `mgingenieria.cl` a secas, no para `www`. La dirección que
+> conviene compartir en tarjetas, firmas y redes es **https://mgingenieria.cl**, sin `www`.
 
-**Opción 1 — GitHub Pages (gratis).** En el repositorio: *Settings → Pages → Source: Deploy from a
-branch*, elige la rama `main` y la carpeta `/ (root)`. En unos minutos queda en línea.
-
-**Opción 2 — Netlify o Vercel (gratis).** Arrastra la carpeta del proyecto a netlify.com/drop.
-Permiten conectar un dominio propio (por ejemplo `mgingenieria.cl`).
-
-**Opción 3 — Hosting propio.** Sube los archivos por FTP a la carpeta pública del servidor.
-
-Para ver el sitio en tu computador antes de publicarlo, basta con abrir `index.html` con doble clic.
+Para ver el sitio en tu computador antes de publicar un cambio, abre `index.html` con doble clic.
 
 ## Detalles técnicos
 
-- Diseño responsivo: se adapta a celular, tablet y escritorio.
+- Diseño responsivo: se adapta a celular, tablet y escritorio. Verificado de 320 a 1920 px.
 - Accesibilidad: navegación por teclado, textos alternativos, contraste alto y respeto por la
   preferencia del sistema de *reducir animaciones*.
 - SEO: metaetiquetas, Open Graph para redes sociales y datos estructurados `ProfessionalService`
   para que Google entienda el negocio, la ubicación y los servicios.
 - Sin dependencias ni frameworks. Lo único externo es la tipografía Montserrat de Google Fonts;
   si no carga, el sitio usa una tipografía de sistema equivalente.
+
+Si vas a trabajar el sitio con un asistente de IA, `CLAUDE.md` tiene el contexto técnico y las
+advertencias de lo que conviene no romper.
